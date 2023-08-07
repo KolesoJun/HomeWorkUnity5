@@ -13,5 +13,6 @@ public static class AnimatorThief
     {
         public const string Speed = "Speed";
         public const string Jump = "Jump";
+        public const string IsNotGround = "IsNotGround";
     }
 }

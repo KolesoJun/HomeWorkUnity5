@@ -28,7 +28,6 @@ public class ThiefController : MonoBehaviour
     {
         Move();
         Jump();
-        Debug.Log(_health);
     }
 
     public void TakeDamege(float damage)

@@ -17,7 +17,7 @@ public class PullPoint : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.GetComponent<Duck>())
+        if (collision.gameObject.TryGetComponent<Duck>(out _))
         {
             _buoyancyEffector.flowMagnitude *= _duration;
         }

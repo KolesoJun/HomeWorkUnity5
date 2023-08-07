@@ -8,8 +8,6 @@ public class Door : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private float _power;
 
-    public bool IsOpen { get; private set; }
-
     private Rigidbody2D _rigidbody;
 
     private void Start()
@@ -21,6 +19,5 @@ public class Door : MonoBehaviour, IPointerClickHandler
     {
         _rigidbody.bodyType = RigidbodyType2D.Dynamic;
         _rigidbody.AddForce(Vector2.right* _power, ForceMode2D.Impulse);
-        IsOpen = true;
     }
 }

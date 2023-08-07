@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,42 +6,68 @@ using UnityEngine;
 [RequireComponent (typeof(AudioSource))]
 public class AlarmSystem : MonoBehaviour
 {
-    [SerializeField] private float _step;
+    private const float VolumeMax = 1f;
+    private const float VolumeMin = 0f;
 
-    private List<ThiefController> _thiefs = new List<ThiefController>();
+    [SerializeField] private float _step;
+    [SerializeField] private float _setback;
+
+    private WaitForSeconds _timePause;
     private AudioSource _audio;
-    private float _volueMax = 1f;
-    private float _volueMin = 0f;
+    private float _volumeAlarm;
+    private bool _isWorkToIncrease;
+    private bool _isIEnumeratorWork;
 
     private void Awake()
     {
         _audio = GetComponent<AudioSource>();
+        _timePause = new WaitForSeconds(_setback);
     }
 
-    private void Update()
+    public void SetupModeAlarm(int countThiefs)
     {
-        if (_thiefs.Count > 0)
-            _audio.volume = Mathf.MoveTowards(_audio.volume, _volueMax, _step * Time.deltaTime);
-        else
-            _audio.volume = Mathf.MoveTowards(_audio.volume, _volueMin, _step * Time.deltaTime);
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.TryGetComponent<ThiefController>(out ThiefController thief))
+        if (_isWorkToIncrease == false && countThiefs >= 1)
         {
+            _isWorkToIncrease = true;
+            _volumeAlarm = VolumeMax;
             _audio.Play();
-            _thiefs.Add(thief);
-        }  
+        }
+
+        if (countThiefs <= 0)
+        {
+            _volumeAlarm = VolumeMin;
+            _isWorkToIncrease = false;
+        }
+
+        StartChangeVolue();
+
+        if (_audio.volume == VolumeMin)
+        {
+            StopCoroutine(ChangeVolue());
+            _audio.Stop();
+            _isIEnumeratorWork = false;
+        }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    private void StartChangeVolue()
     {
-        if (collision.gameObject.TryGetComponent<ThiefController>(out ThiefController thief))
+        if ((_isIEnumeratorWork == false && _audio.volume != VolumeMax)||(_isIEnumeratorWork == false && _volumeAlarm == VolumeMin))
         {
-            if (_thiefs.Contains(thief))
-                _thiefs.Remove(thief);
+            StartCoroutine(ChangeVolue());
+            _isIEnumeratorWork = true;
+        } 
+    }
+
+    private IEnumerator ChangeVolue()
+    {
+        while (_audio.volume != _volumeAlarm)
+        {
+            _audio.volume = Mathf.MoveTowards(_audio.volume, _volumeAlarm, _step);
+            yield return _timePause;
         }
+
+        Debug.Log("_isIEnumeratorWork" + _isIEnumeratorWork);
+        _isIEnumeratorWork = false;
     }
 }
 
