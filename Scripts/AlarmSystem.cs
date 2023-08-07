@@ -10,52 +10,51 @@ public class AlarmSystem : MonoBehaviour
     private const float VolumeMin = 0f;
 
     [SerializeField] private float _step;
-    [SerializeField] private float _setback;
+    [SerializeField] private float _delay;
 
-    private WaitForSeconds _timePause;
+    private WaitForSeconds _wait;
+    private Coroutine _coroutine;
     private AudioSource _audio;
     private float _volumeAlarm;
-    private bool _isWorkToIncrease;
-    private bool _isIEnumeratorWork;
 
     private void Awake()
     {
+        _wait = new WaitForSeconds(_delay);
         _audio = GetComponent<AudioSource>();
-        _timePause = new WaitForSeconds(_setback);
     }
 
-    public void SetupModeAlarm(int countThiefs)
+    public void SetupModeAlarm(bool isThief)
     {
-        if (_isWorkToIncrease == false && countThiefs >= 1)
+        if (isThief)
         {
-            _isWorkToIncrease = true;
             _volumeAlarm = VolumeMax;
             _audio.Play();
+            StopChangeVolue();
+            RestartChangeVolue();
         }
-
-        if (countThiefs <= 0)
+        else
         {
             _volumeAlarm = VolumeMin;
-            _isWorkToIncrease = false;
+            StopChangeVolue();
+            RestartChangeVolue();
         }
-
-        StartChangeVolue();
 
         if (_audio.volume == VolumeMin)
         {
             StopCoroutine(ChangeVolue());
             _audio.Stop();
-            _isIEnumeratorWork = false;
         }
     }
 
-    private void StartChangeVolue()
+    public void RestartChangeVolue()
     {
-        if ((_isIEnumeratorWork == false && _audio.volume != VolumeMax)||(_isIEnumeratorWork == false && _volumeAlarm == VolumeMin))
-        {
-            StartCoroutine(ChangeVolue());
-            _isIEnumeratorWork = true;
-        } 
+        _coroutine = StartCoroutine(ChangeVolue());
+    }
+
+    public void StopChangeVolue()
+    {
+        if (_coroutine != null)
+            StopCoroutine(_coroutine);
     }
 
     private IEnumerator ChangeVolue()
@@ -63,11 +62,8 @@ public class AlarmSystem : MonoBehaviour
         while (_audio.volume != _volumeAlarm)
         {
             _audio.volume = Mathf.MoveTowards(_audio.volume, _volumeAlarm, _step);
-            yield return _timePause;
+            yield return _wait;
         }
-
-        Debug.Log("_isIEnumeratorWork" + _isIEnumeratorWork);
-        _isIEnumeratorWork = false;
     }
 }
 

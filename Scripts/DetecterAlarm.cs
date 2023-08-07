@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class DetecterAlarm : MonoBehaviour
 {
-    private List<ThiefController> _thiefs = new List<ThiefController>();
     private AlarmSystem _alarm;
+    private bool _isThief;
 
     private void Start()
     {
@@ -16,8 +16,8 @@ public class DetecterAlarm : MonoBehaviour
     {
         if (collision.gameObject.TryGetComponent<ThiefController>(out ThiefController thief))
         {
-            _thiefs.Add(thief);
-            _alarm.SetupModeAlarm(_thiefs.Count);
+            _isThief = true;
+            _alarm.SetupModeAlarm(_isThief);
         }
     }
 
@@ -25,10 +25,8 @@ public class DetecterAlarm : MonoBehaviour
     {
         if (collision.gameObject.TryGetComponent<ThiefController>(out ThiefController thief))
         {
-            if (_thiefs.Contains(thief))
-                _thiefs.Remove(thief);
-
-            _alarm.SetupModeAlarm(_thiefs.Count);
+            _isThief = false;
+            _alarm.SetupModeAlarm(_isThief);
         }
     }
 }
